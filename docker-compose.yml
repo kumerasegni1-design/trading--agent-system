@@ -1,0 +1,127 @@
+version: '3.9'
+
+services:
+  # ==================
+  # Backend API
+  # ==================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: trading-agent-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LLM_PROVIDER=${LLM_PROVIDER}
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://trading_user:trading_pass@postgres:5432/trading_agent
+    volumes:
+      - ./backend:/app
+      - ./logs:/app/logs
+      - ./data:/app/data
+    depends_on:
+      - redis
+      - postgres
+      - ollama
+    networks:
+      - trading-network
+    restart: unless-stopped
+
+  # ==================
+  # Frontend Dashboard
+  # ==================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: trading-agent-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+    networks:
+      - trading-network
+    restart: unless-stopped
+
+  # ==================
+  # Redis Cache
+  # ==================
+  redis:
+    image: redis:7-alpine
+    container_name: trading-agent-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - trading-network
+    restart: unless-stopped
+
+  # ==================
+  # PostgreSQL Database
+  # ==================
+  postgres:
+    image: postgres:15-alpine
+    container_name: trading-agent-postgres
+    environment:
+      - POSTGRES_USER=trading_user
+      - POSTGRES_PASSWORD=trading_pass
+      - POSTGRES_DB=trading_agent
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - trading-network
+    restart: unless-stopped
+
+  # ==================
+  # Ollama (Local LLM)
+  # ==================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: trading-agent-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_MODELS=/root/.ollama/models
+    networks:
+      - trading-network
+    restart: unless-stopped
+    # Optional: Pull model on startup
+    # entrypoint: sh -c "ollama pull mistral && ollama serve"
+
+  # ==================
+  # Jupyter for Experiments
+  # ==================
+  jupyter:
+    build:
+      context: ./notebooks
+      dockerfile: Dockerfile
+    container_name: trading-agent-jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/workspace
+      - ./data:/data
+    environment:
+      - JUPYTER_TOKEN=trading-agent
+    networks:
+      - trading-network
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  postgres_data:
+  ollama_data:
+
+networks:
+  trading-network:
+    driver: bridge
