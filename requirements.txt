@@ -33,9 +33,15 @@ requests==2.31.0
 aiohttp==3.9.1
 
 # Trading Platform APIs
-mt5-connector==2.0.0
+MetaTrader5==5.0.45
 TradingView-Scraper==1.0.0
 alpaca-py==0.14.3
+
+# Extra Dependencies for Telegram & OCR
+telethon==1.32.1
+easyocr==1.7.1
+Pillow==10.1.0
+beautifulsoup4==4.12.2
 
 # Database & Cache
 sqlalchemy==2.0.23

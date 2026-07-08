@@ -14,17 +14,27 @@ class BacktestingService:
         logger.info(f"📊 Backtesting service initialized with {engine}")
     
     async def run_backtest(self, strategy_code: str, data: pd.DataFrame, 
-                          initial_capital: float = 10000) -> Dict[str, Any]:
-        """Run backtest on strategy"""
-        logger.info(f"🚀 Running backtest with {len(data)} candles...")
+                          initial_capital: float = 10000,
+                          entry_delay: int = 0,
+                          trade_management: List[Dict] = None) -> Dict[str, Any]:
+        """Run backtest on strategy with optional delay and management rules"""
+        logger.info(f"🚀 Running backtest with {len(data)} candles (Delay: {entry_delay}s)...")
         
+        # Simulate delay if needed
+        if entry_delay > 0:
+            data = self._apply_entry_delay(data, entry_delay)
+
         try:
             if self.engine == "backtrader":
-                results = await self._backtest_backtrader(strategy_code, data, initial_capital)
+                results = await self._backtest_backtrader(strategy_code, data, initial_capital, trade_management)
             elif self.engine == "vectorbt":
-                results = await self._backtest_vectorbt(strategy_code, data, initial_capital)
+                results = await self._backtest_vectorbt(strategy_code, data, initial_capital, trade_management)
             else:
-                results = await self._backtest_quantconnect(strategy_code, data, initial_capital)
+                results = await self._backtest_quantconnect(strategy_code, data, initial_capital, trade_management)
+
+            # Add delay info to results
+            results["entry_delay"] = entry_delay
+            results["trade_management_applied"] = trade_management
             
             logger.info("✅ Backtest completed")
             return results
@@ -32,10 +42,36 @@ class BacktestingService:
             logger.error(f"❌ Backtest failed: {str(e)}")
             raise
     
+    def _apply_entry_delay(self, data: pd.DataFrame, delay_seconds: int) -> pd.DataFrame:
+        """
+        Simulate execution delay by shifting the entry price or time.
+        In OHLC data, we simulate this by assuming we enter 'delay_seconds' later,
+        which usually means we might get a worse price or have to wait for the next candle.
+        """
+        logger.info(f"⏳ Applying {delay_seconds}s entry delay simulation")
+        delayed_data = data.copy()
+
+        # Simple heuristic: if delay is significant (> 1 min for 1m candles),
+        # we shift indices. For smaller delays, we add artificial slippage.
+        # Assuming data is 1-minute OHLC for this simulation:
+        candles_to_shift = delay_seconds // 60
+        if candles_to_shift > 0:
+            delayed_data['open'] = delayed_data['open'].shift(-candles_to_shift)
+            delayed_data['high'] = delayed_data['high'].shift(-candles_to_shift)
+            delayed_data['low'] = delayed_data['low'].shift(-candles_to_shift)
+            delayed_data['close'] = delayed_data['close'].shift(-candles_to_shift)
+
+        # Add slippage based on delay (roughly 0.1 pip per 10 seconds of delay)
+        slippage = (delay_seconds % 60) * 0.00001
+        delayed_data['open'] += slippage
+
+        return delayed_data.dropna()
+
     async def _backtest_backtrader(self, strategy_code: str, data: pd.DataFrame, 
-                                   initial_capital: float) -> Dict[str, Any]:
+                                   initial_capital: float,
+                                   trade_management: List[Dict] = None) -> Dict[str, Any]:
         """Backtest using Backtrader"""
-        logger.info("🚀 Executing Backtrader backtest...")
+        logger.info(f"🚀 Executing Backtrader backtest (Management Rules: {len(trade_management) if trade_management else 0})...")
         
         # TODO: Implement actual Backtrader execution
         # 1. Create strategy class from strategy_code
@@ -64,20 +100,22 @@ class BacktestingService:
         return results
     
     async def _backtest_vectorbt(self, strategy_code: str, data: pd.DataFrame, 
-                                 initial_capital: float) -> Dict[str, Any]:
+                                 initial_capital: float,
+                                 trade_management: List[Dict] = None) -> Dict[str, Any]:
         """Backtest using VectorBT for vectorized performance"""
         logger.info("🚀 Executing VectorBT backtest (vectorized)...")
         
         # TODO: Use VectorBT for fast vectorized backtesting
-        return await self._backtest_backtrader(strategy_code, data, initial_capital)
+        return await self._backtest_backtrader(strategy_code, data, initial_capital, trade_management)
     
     async def _backtest_quantconnect(self, strategy_code: str, data: pd.DataFrame, 
-                                     initial_capital: float) -> Dict[str, Any]:
+                                     initial_capital: float,
+                                     trade_management: List[Dict] = None) -> Dict[str, Any]:
         """Backtest using QuantConnect API"""
         logger.info("🚀 Executing QuantConnect backtest (institutional grade)...")
         
         # TODO: Upload to QuantConnect and run backtest
-        return await self._backtest_backtrader(strategy_code, data, initial_capital)
+        return await self._backtest_backtrader(strategy_code, data, initial_capital, trade_management)
     
     async def walk_forward_analysis(self, strategy_code: str, data: pd.DataFrame,
                                     num_periods: int = 5) -> Dict[str, Any]:

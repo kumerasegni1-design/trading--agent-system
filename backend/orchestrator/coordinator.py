@@ -84,6 +84,9 @@ class AgentCoordinator:
         from agents.verifier_agent import VerifierAgent
         from agents.deployment_agent import DeploymentAgent
         from agents.portfolio_manager import PortfolioManagerAgent
+        from agents.telegram_agent import TelegramSignalAgent
+        from agents.channel_ranker import ChannelRankerAgent
+        from agents.tiktok_agent import TikTokAgent
         
         # Create agent instances
         agents_config = [
@@ -95,6 +98,9 @@ class AgentCoordinator:
             ("verifier_agent", VerifierAgent),
             ("deployment_agent", DeploymentAgent),
             ("portfolio_manager", PortfolioManagerAgent),
+            ("telegram_agent", TelegramSignalAgent),
+            ("channel_ranker", ChannelRankerAgent),
+            ("tiktok_agent", TikTokAgent),
         ]
         
         for agent_name, agent_class in agents_config:

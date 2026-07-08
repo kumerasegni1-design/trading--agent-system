@@ -68,6 +68,18 @@ Prompt: "Research the latest mean reversion papers, generate a strategy based on
 Prompt: "Create a random forest model to predict EUR/USD direction, train on 5 years of data using Colab GPU, backtest, and deploy."
 ```
 
+#### 4. Telegram Signal Trading
+```
+Prompt: "Monitor telegram channels @GoldSignals, @ForexPro, extract signals, backtest them with 30s delay, and deploy if they pass verification."
+```
+
+#### 5. TikTok Strategy Research
+```
+Prompt: "Research 'ICT trading strategy' on TikTok, extract rules, backtest on EURUSD, and report results."
+```
+
+*Note: The TikTokAgent currently uses a basic scraper. For production environments, it is recommended to integrate with a headless browser service (like Playwright or Selenium) to handle TikTok's dynamic content and anti-bot measures.*
+
 ## 🤖 Agent Roles
 
 | Agent | Purpose |
