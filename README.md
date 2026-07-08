@@ -14,7 +14,10 @@ A browser-based multi-agent orchestration system that autonomously generates, ba
 6. **Strategy Verifier Agent** - Statistical soundness, walk-forward analysis
 7. **Deployment Agent** - Pushes to TradingView, MT5, live markets
 8. **Portfolio Manager Agent** - Ensures diversity, prevents duplicate strategies
-9. **Command Center** - Routes prompts to agents, aggregates results
+9. **Telegram Signal Agent** - Monitors channels for signals (text/image)
+10. **Channel Ranker Agent** - Ranks signal providers and detects scams
+11. **TikTok Agent** - Researches strategies from TikTok content
+12. **Command Center** - Routes prompts to agents, aggregates results
 
 ## 🏗️ Key Components
 

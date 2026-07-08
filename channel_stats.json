@@ -8,7 +8,7 @@
         "max_drawdown": 0.0,
         "signals": [
             {
-                "timestamp": "2026-07-08T12:13:06.218951",
+                "timestamp": "2026-07-08T12:53:31.186663",
                 "backtest": {
                     "net_profit": 100
                 },

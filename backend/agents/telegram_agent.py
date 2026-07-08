@@ -143,7 +143,8 @@ class TelegramSignalAgent(BaseAgent):
     async def extract_text_from_media(self, message_obj) -> str:
         """Download media and use OCR to extract text"""
         if not self.ocr_reader:
-            self.ocr_reader = easyocr.Reader(['en']) # Support more languages as needed
+            # Support major trading languages
+            self.ocr_reader = easyocr.Reader(['en', 'ru', 'ar', 'zh_sim'])
 
         try:
             buffer = io.BytesIO()
