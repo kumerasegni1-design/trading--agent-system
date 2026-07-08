@@ -1,0 +1,21 @@
+{
+    "chan1": {
+        "total_signals": 1,
+        "verified_win_rate": 1.0,
+        "claimed_win_rate": 0.0,
+        "authenticity_score": 1.0,
+        "sharpe_ratio": 0.0,
+        "max_drawdown": 0.0,
+        "signals": [
+            {
+                "timestamp": "2026-07-08T12:13:06.218951",
+                "backtest": {
+                    "net_profit": 100
+                },
+                "claim": {
+                    "profit": true
+                }
+            }
+        ]
+    }
+}
