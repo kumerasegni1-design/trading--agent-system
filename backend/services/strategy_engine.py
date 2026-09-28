@@ -1,12 +1,57 @@
 import numpy as np
 import pandas as pd
+import yfinance as yf
 from typing import Dict, List, Optional, Tuple
 
 class DataEngine:
     """
-    Generates or fetches multi-asset historical OHLCV data across FX, Indices, and Crypto.
+    Fetches real market historical OHLCV data across FX, Indices, and Crypto via yfinance,
+    or generates synthetic data as a fallback.
     Includes feature calculation with zero future-data leakage.
     """
+
+    TICKER_MAP = {
+        'EURUSD': 'EURUSD=X',
+        'GBPUSD': 'GBPUSD=X',
+        'AUDUSD': 'AUDUSD=X',
+        'USDCAD': 'USDCAD=X',
+        'BTCUSD': 'BTC-USD',
+        'ETHUSD': 'ETH-USD',
+        'SOLUSD': 'SOL-USD',
+        'SPX500': '^GSPC',
+        'NAS100': '^IXIC',
+        'US2000': '^RUT',
+    }
+
+    @classmethod
+    def fetch_real_ohlcv(
+        cls,
+        symbol: str,
+        asset_class: str,
+        period: str = "2y",
+        interval: str = "1h"
+    ) -> pd.DataFrame:
+        """
+        Fetches real historical OHLCV data from Yahoo Finance.
+        """
+        ticker = cls.TICKER_MAP.get(symbol, symbol)
+        try:
+            df = yf.download(ticker, period=period, interval=interval, progress=False)
+            if df.empty:
+                raise ValueError(f"No data returned for {ticker}")
+
+            # Flatten MultiIndex columns if present
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+
+            df.columns = [str(c).lower() for c in df.columns]
+            df = df[['open', 'high', 'low', 'close', 'volume']].dropna()
+            df['symbol'] = symbol
+            df['asset_class'] = asset_class
+            return df
+        except Exception as e:
+            print(f"⚠️ Falling back to synthetic generator for {symbol}: {e}")
+            return cls.generate_synthetic_ohlcv(symbol, asset_class)
 
     @staticmethod
     def generate_synthetic_ohlcv(

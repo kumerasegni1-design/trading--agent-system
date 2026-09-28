@@ -54,7 +54,8 @@ def test_ten_strategy_suite_export():
 
 
 def test_portfolio_verification_performance():
-    verification_metrics = run_portfolio_verification()
+    # Pass use_real_data=False for deterministic baseline verification in automated test runner
+    verification_metrics = run_portfolio_verification(use_real_data=False)
 
     assert verification_metrics['portfolio_win_rate'] >= 0.60
     assert verification_metrics['avg_correlation'] < 0.30

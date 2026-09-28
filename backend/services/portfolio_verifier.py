@@ -5,22 +5,36 @@ from backend.services.strategy_engine import DataEngine
 from backend.services.walk_forward_backtester import WalkForwardBacktester
 from backend.services.ten_strategy_suite import TenStrategySuite
 
-def run_portfolio_verification():
-    print("🚀 Running Portfolio Verification across 10 Uncorrelated Strategies...")
+def run_portfolio_verification(use_real_data: bool = True):
+    print(f"🚀 Running Portfolio Verification across 10 Uncorrelated Strategies (Real Market Data: {use_real_data})...")
 
-    # Generate multi-asset historical datasets
-    assets_datasets = {
-        'EURUSD': DataEngine.generate_synthetic_ohlcv('EURUSD', 'FX', periods=6000, volatility=0.005, seed=101),
-        'GBPUSD': DataEngine.generate_synthetic_ohlcv('GBPUSD', 'FX', periods=6000, volatility=0.006, seed=102),
-        'BTCUSD': DataEngine.generate_synthetic_ohlcv('BTCUSD', 'Crypto', periods=6000, volatility=0.02, seed=103),
-        'ETHUSD': DataEngine.generate_synthetic_ohlcv('ETHUSD', 'Crypto', periods=6000, volatility=0.025, seed=104),
-        'SPX500': DataEngine.generate_synthetic_ohlcv('SPX500', 'Indices', periods=6000, volatility=0.01, seed=105),
-        'NAS100': DataEngine.generate_synthetic_ohlcv('NAS100', 'Indices', periods=6000, volatility=0.012, seed=106),
-        'AUDUSD': DataEngine.generate_synthetic_ohlcv('AUDUSD', 'FX', periods=6000, volatility=0.006, seed=107),
-        'US2000': DataEngine.generate_synthetic_ohlcv('US2000', 'Indices', periods=6000, volatility=0.014, seed=108),
-        'SOLUSD': DataEngine.generate_synthetic_ohlcv('SOLUSD', 'Crypto', periods=6000, volatility=0.03, seed=109),
-        'USDCAD': DataEngine.generate_synthetic_ohlcv('USDCAD', 'FX', periods=6000, volatility=0.005, seed=110),
-    }
+    # Fetch real market data across FX, Crypto, and Indices
+    if use_real_data:
+        assets_datasets = {
+            'EURUSD': DataEngine.fetch_real_ohlcv('EURUSD', 'FX'),
+            'GBPUSD': DataEngine.fetch_real_ohlcv('GBPUSD', 'FX'),
+            'BTCUSD': DataEngine.fetch_real_ohlcv('BTCUSD', 'Crypto'),
+            'ETHUSD': DataEngine.fetch_real_ohlcv('ETHUSD', 'Crypto'),
+            'SPX500': DataEngine.fetch_real_ohlcv('SPX500', 'Indices'),
+            'NAS100': DataEngine.fetch_real_ohlcv('NAS100', 'Indices'),
+            'AUDUSD': DataEngine.fetch_real_ohlcv('AUDUSD', 'FX'),
+            'US2000': DataEngine.fetch_real_ohlcv('US2000', 'Indices'),
+            'SOLUSD': DataEngine.fetch_real_ohlcv('SOLUSD', 'Crypto'),
+            'USDCAD': DataEngine.fetch_real_ohlcv('USDCAD', 'FX'),
+        }
+    else:
+        assets_datasets = {
+            'EURUSD': DataEngine.generate_synthetic_ohlcv('EURUSD', 'FX', periods=6000, seed=101),
+            'GBPUSD': DataEngine.generate_synthetic_ohlcv('GBPUSD', 'FX', periods=6000, seed=102),
+            'BTCUSD': DataEngine.generate_synthetic_ohlcv('BTCUSD', 'Crypto', periods=6000, seed=103),
+            'ETHUSD': DataEngine.generate_synthetic_ohlcv('ETHUSD', 'Crypto', periods=6000, seed=104),
+            'SPX500': DataEngine.generate_synthetic_ohlcv('SPX500', 'Indices', periods=6000, seed=105),
+            'NAS100': DataEngine.generate_synthetic_ohlcv('NAS100', 'Indices', periods=6000, seed=106),
+            'AUDUSD': DataEngine.generate_synthetic_ohlcv('AUDUSD', 'FX', periods=6000, seed=107),
+            'US2000': DataEngine.generate_synthetic_ohlcv('US2000', 'Indices', periods=6000, seed=108),
+            'SOLUSD': DataEngine.generate_synthetic_ohlcv('SOLUSD', 'Crypto', periods=6000, seed=109),
+            'USDCAD': DataEngine.generate_synthetic_ohlcv('USDCAD', 'FX', periods=6000, seed=110),
+        }
 
     strategies = [
         ('Strategy 1 (FX EMA Trend)', TenStrategySuite.strategy_1_fx_ema_trend, assets_datasets['EURUSD']),
