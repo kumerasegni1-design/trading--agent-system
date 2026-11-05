@@ -1,0 +1,7 @@
+
+# Trading desks data and bytecode
+data/oanda/
+trading_desks/**/__pycache__/
+__pycache__/
+*.pyc
+.pytest_cache/

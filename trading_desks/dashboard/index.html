@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30 Human Expert Trading Desks | Institutional Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #121927;
+            --bg-card: #182234;
+            --border-color: #24324a;
+            --accent-gold: #f59e0b;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(180deg, #162033 0%, var(--bg-primary) 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-sub {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        select, button {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        select:hover, button:hover {
+            border-color: var(--accent-gold);
+        }
+
+        button.btn-primary {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #000;
+            border: none;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+        }
+
+        button.btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        main {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .panel {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 1rem 1.25rem;
+            background-color: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.05rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .desks-list {
+            overflow-y: auto;
+            max-height: calc(100vh - 220px);
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .desk-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .desk-card:hover, .desk-card.active {
+            border-color: var(--accent-gold);
+            transform: translateX(4px);
+            background-color: #1e2c44;
+        }
+
+        .desk-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .trader-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .specialty {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+
+        .detail-view {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .metric-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-top: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .positive { color: var(--accent-green); }
+        .negative { color: var(--accent-red); }
+
+        .chart-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            min-height: 320px;
+        }
+
+        .trader-profile-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+
+        .philosophy-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            font-style: italic;
+            border-left: 3px solid var(--accent-gold);
+            padding-left: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .trades-table-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <div class="brand-title">🏛️ 30 HUMAN EXPERT TRADING DESKS</div>
+            <div class="brand-sub">OANDA Hugging Face 1-Min Data | 1:2 RR | Max 1 Trade / Week</div>
+        </div>
+        <div class="controls">
+            <select id="assetSelect">
+                <option value="GOLD">XAU/USD (Gold)</option>
+                <option value="EURUSD">EUR/USD</option>
+            </select>
+            <select id="tfSelect">
+                <option value="15m" selected>15-Minute</option>
+                <option value="5m">5-Minute</option>
+                <option value="30m">30-Minute</option>
+                <option value="1h">1-Hour</option>
+            </select>
+            <button class="btn-primary" id="runAllBtn" onclick="runAllDesks()">⚡ Run Portfolio Backtest</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Left: Desks List -->
+        <div class="panel">
+            <div class="panel-header">
+                <span>Trading Desks (30)</span>
+                <span id="deskCounter" style="font-size: 0.8rem; color: var(--accent-gold);">30 Active</span>
+            </div>
+            <div class="desks-list" id="desksList">
+                <!-- Loaded via JS -->
+            </div>
+        </div>
+
+        <!-- Right: Desk Details & Performance -->
+        <div class="detail-view">
+            <div class="trader-profile-box" id="profileBox">
+                <h2 id="activeTraderName">Select a Desk</h2>
+                <div id="activeSpecialty" style="color: var(--accent-gold); font-weight: 600; margin-top: 4px;">Institutional Specialist</div>
+                <div class="philosophy-text" id="activePhilosophy">Trading philosophy and edge formulation will appear here.</div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="metric-label">Total Return</div>
+                    <div class="metric-val" id="metricReturn">--</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-label">Win Rate</div>
+                    <div class="metric-val" id="metricWinRate">--</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-label">Sharpe Ratio</div>
+                    <div class="metric-val" id="metricSharpe">--</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-label">Max Drawdown</div>
+                    <div class="metric-val" id="metricDrawdown">--</div>
+                </div>
+            </div>
+
+            <div class="chart-box">
+                <canvas id="equityChart"></canvas>
+            </div>
+
+            <div class="trades-table-container">
+                <div class="panel-header">Executed Trades (Max 1/Week, 1:2 RR)</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Entry Time</th>
+                            <th>Dir</th>
+                            <th>Entry</th>
+                            <th>SL</th>
+                            <th>TP</th>
+                            <th>Exit</th>
+                            <th>PnL ($)</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradesTableBody">
+                        <tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No trades executed yet. Select a desk or click Run Portfolio Backtest.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let allDesks = [];
+        let selectedDeskId = "DESK-01";
+        let equityChart = null;
+
+        async function init() {
+            try {
+                const resp = await fetch('/api/desks');
+                const data = await resp.json();
+                allDesks = data.desks;
+                renderDesksList();
+                if (allDesks.length > 0) {
+                    selectDesk(allDesks[0].desk_id);
+                }
+            } catch (err) {
+                console.error("Failed to load desks:", err);
+            }
+        }
+
+        function renderDesksList() {
+            const container = document.getElementById('desksList');
+            container.innerHTML = allDesks.map(d => `
+                <div class="desk-card ${d.desk_id === selectedDeskId ? 'active' : ''}" onclick="selectDesk('${d.desk_id}')" id="card-${d.desk_id}">
+                    <div class="desk-id">${d.desk_id} • ${d.preferred_timeframe}</div>
+                    <div class="trader-name">${d.trader_name}</div>
+                    <div class="specialty">${d.specialty}</div>
+                    <div class="tags">
+                        <span class="tag">${d.style}</span>
+                        <span class="tag">1:2 RR</span>
+                        <span class="tag">1/wk</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function selectDesk(deskId) {
+            selectedDeskId = deskId;
+            document.querySelectorAll('.desk-card').forEach(c => c.classList.remove('active'));
+            const card = document.getElementById(`card-${deskId}`);
+            if (card) card.classList.add('active');
+
+            const desk = allDesks.find(d => d.desk_id === deskId);
+            if (!desk) return;
+
+            document.getElementById('activeTraderName').innerText = `${desk.trader_name} (${desk.desk_id})`;
+            document.getElementById('activeSpecialty').innerText = `${desk.specialty} • ${desk.experience_years} yrs exp • Preferred TF: ${desk.preferred_timeframe}`;
+            document.getElementById('activePhilosophy').innerText = `"${desk.philosophy}"`;
+
+            // Run backtest for this desk
+            const symbol = document.getElementById('assetSelect').value;
+            const tf = document.getElementById('tfSelect').value;
+
+            try {
+                const resp = await fetch(`/api/backtest/desk/${deskId}?symbol=${symbol}&timeframe=${tf}`, { method: 'POST' });
+                const res = await resp.json();
+                updateDashboard(res);
+            } catch (err) {
+                console.error("Backtest failed:", err);
+            }
+        }
+
+        async function runAllDesks() {
+            const btn = document.getElementById('runAllBtn');
+            btn.innerText = "⏳ Running Backtests...";
+            btn.disabled = true;
+
+            const symbol = document.getElementById('assetSelect').value;
+            const tf = document.getElementById('tfSelect').value;
+
+            try {
+                const resp = await fetch(`/api/backtest/all?symbol=${symbol}&timeframe=${tf}`, { method: 'POST' });
+                const res = await resp.json();
+                alert(`Portfolio Backtest Complete! Evaluated ${res.desks_count} desks on ${res.bars_tested} bars of ${res.symbol}.`);
+                // Select top desk
+                if (res.results && res.results.length > 0) {
+                    selectDesk(res.results[0].desk.desk_id);
+                }
+            } catch (err) {
+                console.error("Portfolio backtest failed:", err);
+            } finally {
+                btn.innerText = "⚡ Run Portfolio Backtest";
+                btn.disabled = false;
+            }
+        }
+
+        function updateDashboard(res) {
+            const m = res.metrics;
+            const retEl = document.getElementById('metricReturn');
+            retEl.innerText = `${m.total_return_pct > 0 ? '+' : ''}${m.total_return_pct}%`;
+            retEl.className = `metric-val ${m.total_return_pct >= 0 ? 'positive' : 'negative'}`;
+
+            const wrEl = document.getElementById('metricWinRate');
+            wrEl.innerText = `${m.win_rate_pct}%`;
+            wrEl.className = `metric-val ${m.win_rate_pct >= 50 ? 'positive' : ''}`;
+
+            document.getElementById('metricSharpe').innerText = m.sharpe_ratio;
+            document.getElementById('metricDrawdown').innerText = `-${m.max_drawdown_pct}%`;
+
+            // Equity curve chart
+            renderChart(res.equity_curve);
+
+            // Trades table
+            const tbody = document.getElementById('tradesTableBody');
+            if (!res.trades || res.trades.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No trades qualified under strict weekly filter.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = res.trades.map(t => `
+                <tr>
+                    <td>${t.trade_num}</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">${t.entry_time.split('T')[0]}</td>
+                    <td style="font-weight: 700; color: ${t.direction === 'BUY' ? '#10b981' : '#ef4444'}">${t.direction}</td>
+                    <td>${t.entry_price.toFixed(2)}</td>
+                    <td>${t.sl_price.toFixed(2)}</td>
+                    <td>${t.tp_price.toFixed(2)}</td>
+                    <td>${t.exit_price.toFixed(2)}</td>
+                    <td style="font-weight: 700; color: ${t.pnl >= 0 ? '#10b981' : '#ef4444'}">${t.pnl >= 0 ? '+' : ''}$${t.pnl.toFixed(2)}</td>
+                    <td><span class="tag">${t.exit_reason}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderChart(curveData) {
+            const ctx = document.getElementById('equityChart').getContext('2d');
+            if (equityChart) equityChart.destroy();
+
+            const labels = curveData.map((_, i) => `${i}%`);
+            equityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Desk Equity ($)',
+                        data: curveData,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8' } }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b' } },
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b' } }
+                    }
+                }
+            });
+        }
+
+        document.getElementById('assetSelect').addEventListener('change', () => selectDesk(selectedDeskId));
+        document.getElementById('tfSelect').addEventListener('change', () => selectDesk(selectedDeskId));
+
+        window.onload = init;
+    </script>
+</body>
+</html>
